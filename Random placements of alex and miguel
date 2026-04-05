@@ -15,12 +15,11 @@ class PigeonHole(MovingCameraScene):
         num_rounds = 6
         num_players = 2 ** num_rounds
         
-        # Compress the x-axis to fit the narrower screen (x ranges from -4 to 4)
+
         x_start = -3.5
         x_step = 7.0 / num_rounds  
         
-        # Expand the y-axis to use the taller height (y ranges from roughly -7.1 to 7.1)
-        # Stretching the 64 players between y=6.5 and y=-6.5
+
         y_vals = [6.5 - 13.0 * (i / (num_players - 1)) for i in range(num_players)]
         
         bracket_lines = VGroup()
@@ -34,24 +33,22 @@ class PigeonHole(MovingCameraScene):
                 y1 = y_vals[i]
                 y2 = y_vals[i+1]
                 
-                # Draw the connections. Slightly thicker stroke_width (1.5) since we have more vertical room.
+      
                 h_line1 = Line([x_curr, y1, 0], [x_next, y1, 0], stroke_width=1.5, color=WHITE)
                 h_line2 = Line([x_curr, y2, 0], [x_next, y2, 0], stroke_width=1.5, color=WHITE)
                 v_line = Line([x_next, y1, 0], [x_next, y2, 0], stroke_width=1.5, color=WHITE)
                 
                 bracket_lines.add(h_line1, h_line2, v_line)
                 
-                # Calculate the y-coordinate for the winner advancing
+         
                 next_y_vals.append((y1 + y2) / 2)
             
             y_vals = next_y_vals
             
-        # Draw the final championship line extending to the right edge
         final_x = x_start + num_rounds * x_step
         final_line = Line([final_x, y_vals[0], 0], [final_x + 0.5, y_vals[0], 0], stroke_width=3, color=YELLOW)
         bracket_lines.add(final_line)
         
-        # Animate
         self.add(bracket_lines)
         self.wait()
         self.play(self.camera.frame.animate.scale(0.9).shift(LEFT*2.5), run_time=2)
@@ -80,21 +77,17 @@ class PigeonHole(MovingCameraScene):
 
             x_r2 = x_start + x_step
         
-        # Calculate the 32 y-coordinates for Round 2
-        # This takes the average of each pair from Round 1
         y_vals_r2 = [(y_vals[i] + y_vals[i+1]) / 2 for i in range(0, 64, 2)]
         
         self.add(man1, man2)
         self.wait()
-        # Rapidly jump between random Round 2 spots
+
         for i in range(30):
-            # There are only 32 spots in Round 2, so our range is 0 to 32
             num1 = random.randrange(0, 32)
             num2 = num1
             while num2 == num1:
                 num2 = random.randrange(0, 32)
             
-            # Snap them directly to the Round 2 nodes
             man1.move_to([x_r2, y_vals_r2[num1], 0])
             man2.move_to([x_r2, y_vals_r2[num2], 0])
             
