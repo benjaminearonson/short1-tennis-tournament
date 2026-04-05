@@ -1,0 +1,60 @@
+import numpy as np
+from manim import *
+import itertools
+import random
+import math
+
+config.pixel_height = 1920
+config.pixel_width = 1080
+config.frame_height = 16.0
+config.frame_width = 9.0
+
+class PigeonHole(ThreeDScene):
+    def construct(self):
+        self.camera.background_color = "#121414"
+        num_rounds = 6
+        num_players = 2 ** num_rounds
+        
+        # Compress the x-axis to fit the narrower screen (x ranges from -4 to 4)
+        x_start = -3.5
+        x_step = 7.0 / num_rounds  
+        
+        # Expand the y-axis to use the taller height (y ranges from roughly -7.1 to 7.1)
+        # Stretching the 64 players between y=6.5 and y=-6.5
+        y_vals = [6.5 - 13.0 * (i / (num_players - 1)) for i in range(num_players)]
+        
+        bracket_lines = VGroup()
+        
+        for r in range(num_rounds):
+            next_y_vals = []
+            x_curr = x_start + r * x_step
+            x_next = x_start + (r + 1) * x_step
+            
+            for i in range(0, len(y_vals), 2):
+                y1 = y_vals[i]
+                y2 = y_vals[i+1]
+                
+                # Draw the connections. Slightly thicker stroke_width (1.5) since we have more vertical room.
+                h_line1 = Line([x_curr, y1, 0], [x_next, y1, 0], stroke_width=1.5, color=WHITE)
+                h_line2 = Line([x_curr, y2, 0], [x_next, y2, 0], stroke_width=1.5, color=WHITE)
+                v_line = Line([x_next, y1, 0], [x_next, y2, 0], stroke_width=1.5, color=WHITE)
+                
+                bracket_lines.add(h_line1, h_line2, v_line)
+                
+                # Calculate the y-coordinate for the winner advancing
+                next_y_vals.append((y1 + y2) / 2)
+            
+            y_vals = next_y_vals
+            
+        # Draw the final championship line extending to the right edge
+        final_x = x_start + num_rounds * x_step
+        final_line = Line([final_x, y_vals[0], 0], [final_x + 0.5, y_vals[0], 0], stroke_width=3, color=YELLOW)
+        bracket_lines.add(final_line)
+        
+        # Animate
+        self.play(Create(bracket_lines, lag_ratio=0.01), run_time=4)
+        self.wait(2)
+        
+
+
+        self.wait()
