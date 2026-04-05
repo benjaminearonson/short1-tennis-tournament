@@ -1,0 +1,103 @@
+import numpy as np
+from manim import *
+import itertools
+import random
+import math
+
+config.pixel_height = 1920
+config.pixel_width = 1080
+config.frame_height = 16.0
+config.frame_width = 9.0
+
+class PigeonHole(Scene):
+    def construct(self):
+        self.camera.background_color = "#121414"
+        
+        men = VGroup(*[SVGMobject("man svg.svg").set_fill(WHITE).scale(0.3) for _ in range(64)])
+        
+
+        men.arrange_in_grid(rows=4, cols=16, buff=0.2)
+        
+
+        self.play(FadeIn(men, lag_ratio=0.01), run_time=2)
+        self.wait(0.5)
+
+        self.wait(2)
+
+        num_players = 64
+        x_start = -3.5
+        y_vals = [6.5 - 13.0 * (i / (num_players - 1)) for i in range(num_players)]
+        
+
+        self.play(
+            *[
+                man.animate.scale(0.25).move_to([x_start, y_vals[i], 0]) 
+                for i, man in enumerate(men)
+            ],
+            run_time=3,
+            rate_func=smooth
+        )
+        
+        self.wait(2)
+        active_players = list(men) 
+        current_y_vals = list(y_vals)
+        num_rounds = 6
+        num_players = 2 ** num_rounds
+        x_start = -3.5
+        x_step = 7.0 / num_rounds  
+        y_vals = [6.5 - 13.0 * (i / (num_players - 1)) for i in range(num_players)]
+
+        for r in range(num_rounds):
+            next_players = []
+            next_y_vals = []
+            
+       
+            x_next = x_start + (r + 1) * x_step
+            
+            round_animations = []
+            
+        
+            for i in range(0, len(active_players), 2):
+                p1 = active_players[i]
+                p2 = active_players[i+1]
+                
+                y1 = current_y_vals[i]
+                y2 = current_y_vals[i+1]
+                y_mid = (y1 + y2) / 2  
+                
+          
+                if random.choice([0, 1]) == 0:
+                    winner, loser = p1, p2
+                else:
+                    winner, loser = p2, p1
+                    
+          
+                if r<2:
+                    round_animations.append(winner.animate.move_to([x_next, y_mid, 0]).scale(2))
+                else:
+                    round_animations.append(winner.animate.move_to([x_next, y_mid, 0]))
+                
+  
+                round_animations.append(FadeOut(loser, scale=0.1))
+      
+                next_players.append(winner)
+                next_y_vals.append(y_mid)
+                
+
+            self.play(*round_animations, run_time=1.5)
+            self.wait(0.5)
+       
+            active_players = next_players
+            current_y_vals = next_y_vals
+            
+
+        champion = active_players[0]
+        self.play(
+            champion.animate.set_color(YELLOW),
+            run_time=1.5
+        )
+        self.wait(2)
+        
+
+
+        self.wait()
